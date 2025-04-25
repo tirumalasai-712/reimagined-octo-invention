@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmAI - Your Agricultural Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #28a745;
+            --secondary: #f8f9fa;
+            --dark: #343a40;
+            --light: #ffffff;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .hero-section {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+        }
+        
+        .feature-card {
+            border: none;
+            border-radius: 10px;
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        /* Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 350px;
+            max-width: 90%;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .chatbot-header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .chatbot-body {
+            background-color: white;
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        
+        .chatbot-footer {
+            background-color: var(--secondary);
+            padding: 10px;
+            display: flex;
+        }
+        
+        .chatbot-input {
+            flex: 1;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 8px 15px;
+            outline: none;
+        }
+        
+        .chatbot-send {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            max-width: 80%;
+        }
+        
+        .bot-message {
+            background-color: #e9ecef;
+            border-radius: 15px 15px 15px 0;
+            padding: 10px 15px;
+            align-self: flex-start;
+        }
+        
+        .user-message {
+            background-color: var(--primary);
+            color: white;
+            border-radius: 15px 15px 0 15px;
+            padding: 10px 15px;
+            margin-left: auto;
+        }
+        
+        .chatbot-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+        }
+        
+        .soil-form input, .soil-form select {
+            margin-bottom: 15px;
+        }
+        
+        .diagnosis-result {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .chatbot-container {
+                width: 90%;
+                right: 5%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-leaf me-2"></i>FarmAI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#features">Features</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#how-it-works">How It Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <h1 class="display-4 fw-bold mb-4">Your AI-Powered Farming Assistant</h1>
+            <p class="lead mb-5">Get personalized crop recommendations, diagnose plant diseases, and receive expert farming advice through our intelligent chatbot.</p>
+            <button id="openChatbot" class="btn btn-success btn-lg px-4 me-2">
+                <i class="fas fa-comment-dots me-2"></i>Chat Now
+            </button>
+            <a href="#how-it-works" class="btn btn-outline-light btn-lg px-4">
+                <i class="fas fa-play-circle me-2"></i>How It Works
+            </a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="py-5 bg-white">
+        <div class="container">
+            <h2 class="text-center mb-5">How FarmAI Helps Farmers</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <h3>Crop Recommendations</h3>
+                        <p>Get AI-powered suggestions for the best crops to plant based on your soil conditions, climate, and region.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-bug"></i>
+                        </div>
+                        <h3>Disease Diagnosis</h3>
+                        <p>Upload photos of your plants to identify diseases, pests, or nutrient deficiencies with our computer vision AI.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card feature-card p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>24/7 Expert Advice</h3>
+                        <p>Our AI assistant provides instant answers to your farming questions, anytime, anywhere.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-5 bg-light">
+        <div class="container">
+            <h2 class="text-center mb-5">How It Works</h2>
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4">
+                    <div class="card p-4">
+                        <h3><i class="fas fa-seedling me-2 text-success"></i> Crop Recommendation</h3>
+                        <p class="text-muted">Enter your soil details to get personalized crop suggestions:</p>
+                        <form id="soilForm" class="soil-form">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Soil pH</label>
+                                    <input type="number" class="form-control" id="soilPh" step="0.1" min="0" max="14" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Nitrogen (ppm)</label>
+                                    <input type="number" class="form-control" id="nitrogen" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Phosphorus (ppm)</label>
+                                    <input type="number" class="form-control" id="phosphorus" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Potassium (ppm)</label>
+                                    <input type="number" class="form-control" id="potassium" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Moisture (%)</label>
+                                    <input type="number" class="form-control" id="moisture" min="0" max="100" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Region</label>
+                                    <select class="form-select" id="region" required>
+                                        <option value="">Select region</option>
+                                        <option value="tropical">Tropical</option>
+                                        <option value="temperate">Temperate</option>
+                                        <option value="arid">Arid</option>
+                                        <option value="mediterranean">Mediterranean</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success mt-3">
+                                <i class="fas fa-calculator me-2"></i>Get Recommendations
+                            </button>
+                        </form>
+                        <div id="cropResults" class="mt-4"></div>
+                    </div>
+                </div>
+                <div class="col-lg-6 mb-4">
+                    <div class="card p-4">
+                        <h3><i class="fas fa-bug me-2 text-success"></i> Disease Diagnosis</h3>
+                        <p class="text-muted">Upload a photo of your plant to identify diseases or deficiencies:</p>
+                        <div class="text-center border rounded p-4" id="dropZone">
+                            <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                            <p>Drag & drop plant image here or</p>
+                            <input type="file" id="plantImage" accept="image/*" class="d-none">
+                            <label for="plantImage" class="btn btn-outline-success">
+                                <i class="fas fa-camera me-2"></i>Select Image
+                            </label>
+                        </div>
+                        <div id="diagnosisResults" class="diagnosis-result mt-4" style="display: none;">
+                            <h4>Diagnosis Result</h4>
+                            <div id="diseaseName" class="fw-bold"></div>
+                            <div id="confidence" class="text-muted small mb-2"></div>
+                            <h5 class="mt-3">Recommended Treatments:</h5>
+                            <ul id="treatments"></ul>
+                            <h5 class="mt-3">Organic Solutions:</h5>
+                            <ul id="organicSolutions"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chatbot Interface -->
+    <div class="chatbot-container" id="chatbot">
+        <div class="chatbot-header">
+            <div>
+                <i class="fas fa-robot me-2"></i>
+                <strong>FarmAI Assistant</strong>
+            </div>
+            <div>
+                <i class="fas fa-times" id="closeChatbot"></i>
+            </div>
+        </div>
+        <div class="chatbot-body" id="chatbotMessages">
+            <div class="message bot-message">
+                Hello! I'm your FarmAI assistant. How can I help you today? Here are some things I can do:
+                <ul>
+                    <li>Recommend crops based on your soil</li>
+                    <li>Diagnose plant diseases from photos</li>
+                    <li>Answer farming questions</li>
+                </ul>
+                What would you like help with?
+            </div>
+        </div>
+        <div class="chatbot-footer">
+            <input type="text" class="chatbot-input" id="userMessage" placeholder="Ask a farming question...">
+            <button class="chatbot-send" id="sendMessage">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <button class="chatbot-toggle" id="toggleChatbot">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+
+    <!-- Footer -->
+    <footer id="contact" class="bg-dark text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 mb-4">
+                    <h5><i class="fas fa-leaf me-2"></i>FarmAI</h5>
+                    <p>Empowering farmers with AI technology to improve yields and reduce crop losses.</p>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="#features" class="text-white">Features</a></li>
+                        <li><a href="#how-it-works" class="text-white">How It Works</a></li>
+                        <li><a href="#" class="text-white">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 mb-4">
+                    <h5>Contact Us</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-envelope me-2"></i> support@farmai.com</li>
+                        <li><i class="fas fa-phone me-2"></i> +1 (555) 123-4567</li>
+                    </ul>
+                </div>
+            </div>
+            <hr>
+            <div class="text-center">
+                <p class="mb-0">&copy; 2023 FarmAI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        // Chatbot functionality
+        const toggleChatbot = document.getElementById('toggleChatbot');
+        const chatbot = document.getElementById('chatbot');
+        const closeChatbot = document.getElementById('closeChatbot');
+        const openChatbot = document.getElementById('openChatbot');
+        const userMessage = document.getElementById('userMessage');
+        const sendMessage = document.getElementById('sendMessage');
+        const chatbotMessages = document.getElementById('chatbotMessages');
+        
+        // Toggle chatbot visibility
+        toggleChatbot.addEventListener('click', () => {
+            chatbot.style.display = chatbot.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        openChatbot.addEventListener('click', () => {
+            chatbot.style.display = 'block';
+        });
+        
+        closeChatbot.addEventListener('click', () => {
+            chatbot.style.display = 'none';
+        });
+        
+        // Send message function
+        function sendChatMessage() {
+            const message = userMessage.value.trim();
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            userMessage.value = '';
+            
+            // Simulate bot response (in a real app, this would call your backend API)
+            setTimeout(() => {
+                const response = generateBotResponse(message);
+                addMessage(response.text, 'bot', response.type);
+            }, 1000);
+        }
+        
+        // Add message to chat
+        function addMessage(text, sender, type = 'text') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            if (type === 'text') {
+                messageDiv.innerHTML = text;
+            } else if (type === 'crop-recommendation') {
+                messageDiv.innerHTML = `
+                    <strong>Crop Recommendations:</strong><br>
+                    ${text}
+                `;
+            } else if (type === 'disease-diagnosis') {
+                messageDiv.innerHTML = `
+                    <strong>Diagnosis Result:</strong><br>
+                    ${text}
+                `;
+            }
+            
+            chatbotMessages.appendChild(messageDiv);
+            chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+        }
+        
+        // Generate bot response
+        function generateBotResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            // Crop recommendation
+            if (lowerMessage.includes('crop') || lowerMessage.includes('plant') || lowerMessage.includes('soil')) {
+                return {
+                    text: "To get crop recommendations, please provide your soil details including pH, nitrogen, phosphorus, potassium levels, moisture, and region.",
+                    type: 'text'
+                };
+            }
+            
+            // Disease diagnosis
+            if (lowerMessage.includes('disease') || lowerMessage.includes('pest') || lowerMessage.includes('sick')) {
+                return {
+                    text: "You can upload a photo of your plant for disease diagnosis. Click the camera icon below to upload an image.",
+                    type: 'text'
+                };
+            }
+            
+            // Weather
+            if (lowerMessage.includes('weather') || lowerMessage.includes('rain')) {
+                return {
+                    text: "The current weather in your area is sunny with a high of 28°C. No rain expected in the next 3 days.",
+                    type: 'text'
+                };
+            }
+            
+            // Default response
+            return {
+                text: "I can help with crop recommendations, plant disease diagnosis, and general farming advice. What would you like help with?",
+                type: 'text'
+            };
+        }
+        
+        // Event listeners
+        sendMessage.addEventListener('click', sendChatMessage);
+        userMessage.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendChatMessage();
+        });
+        
+        // Soil form submission
+        document.getElementById('soilForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const soilData = {
+                pH: document.getElementById('soilPh').value,
+                nitrogen: document.getElementById('nitrogen').value,
+                phosphorus: document.getElementById('phosphorus').value,
+                potassium: document.getElementById('potassium').value,
+                moisture: document.getElementById('moisture').value,
+                region: document.getElementById('region').value
+            };
+            
+            // Simulate API call (in real app, this would call your backend)
+            setTimeout(() => {
+                const recommendations = generateCropRecommendations(soilData);
+                displayCropResults(recommendations, soilData);
+            }, 1500);
+        });
+        
+        // Generate crop recommendations
+        function generateCropRecommendations(soilData) {
+            // Simple logic - in a real app this would use ML
+            const crops = [];
+            
+            if (soilData.pH >= 6 && soilData.pH <= 7.5) {
+                if (soilData.region === 'tropical') {
+                    crops.push({
+                        name: 'Rice',
+                        suitability: 'High',
+                        reason: 'Ideal for tropical regions with neutral pH'
+                    });
+                }
+                crops.push({
+                    name: 'Wheat',
+                    suitability: 'High',
+                    reason: 'Thrives in neutral pH soils'
+                });
+            }
+            
+            if (soilData.pH < 6 && soilData.region !== 'arid') {
+                crops.push({
+                    name: 'Potatoes',
+                    suitability: 'Medium',
+                    reason: 'Prefers slightly acidic soils'
+                });
+            }
+            
+            if (crops.length === 0) {
+                crops.push({
+                    name: 'Consult an expert',
+                    suitability: 'Unknown',
+                    reason: 'Soil parameters don\'t match common crop profiles'
+                });
+            }
+            
+            return crops;
+        }
+        
+        // Display crop results
+        function displayCropResults(crops, soilData) {
+            let html = '<h4>Recommended Crops:</h4><ul class="list-group mb-3">';
+            
+            crops.forEach(crop => {
+                html += `
+                    <li class="list-group-item">
+                        <strong>${crop.name}</strong> (${crop.suitability} suitability)
+                        <div class="text-muted small">${crop.reason}</div>
+                    </li>
+                `;
+            });
+            
+            html += '</ul><h5>Based on your soil data:</h5><ul class="list-group">';
+            html += `<li class="list-group-item">pH: ${soilData.pH || 'Not specified'}</li>`;
+            html += `<li class="list-group-item">Nitrogen: ${soilData.nitrogen || 'Not specified'} ppm</li>`;
+            html += `<li class="list-group-item">Phosphorus: ${soilData.phosphorus || 'Not specified'} ppm</li>`;
+            html += `<li class="list-group-item">Potassium: ${soilData.potassium || 'Not specified'} ppm</li>`;
+            html += `<li class="list-group-item">Moisture: ${soilData.moisture || 'Not specified'}%</li>`;
+            html += `<li class="list-group-item">Region: ${soilData.region || 'Not specified'}</li>`;
+            html += '</ul>';
+            
+            document.getElementById('cropResults').innerHTML = html;
+        }
+        
+        // Image upload for disease diagnosis
+        document.getElementById('plantImage').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const dropZone = document.getElementById('dropZone');
+            dropZone.innerHTML = `
+                <img src="${URL.createObjectURL(file)}" class="img-thumbnail mb-2" style="max-height: 200px;">
+                <p>Analyzing image...</p>
+            `;
+            
+            // Simulate API call (in real app, this would call your computer vision API)
+            setTimeout(() => {
+                const diagnosis = diagnosePlant(file);
+                displayDiagnosisResults(diagnosis);
+            }, 2000);
+        });
+        
+        // Drag and drop for images
+        const dropZone = document.getElementById('dropZone');
+        
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#28a745';
+            dropZone.style.backgroundColor = 'rgba(40, 167, 69, 0.1)';
+        });
+        
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.style.borderColor = '#dee2e6';
+            dropZone.style.backgroundColor = '';
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = '#dee2e6';
+            dropZone.style.backgroundColor = '';
+            
+            const file = e.dataTransfer.files[0];
+            if (!file.type.match('image.*')) {
+                alert('Please upload an image file');
+                return;
+            }
+            
+            document.getElementById('plantImage').files = e.dataTransfer.files;
+            const event = new Event('change');
+            document.getElementById('plantImage').dispatchEvent(event);
+        });
+        
+        // Simulate plant diagnosis
+        function diagnosePlant(imageFile) {
+            // Mock response - in real app this would use computer vision
+            return {
+                disease: 'Early Blight',
+                confidence: '85%',
+                treatments: [
+                    'Remove affected leaves',
+                    'Apply copper-based fungicide',
+                    'Improve air circulation',
+                    'Water at the base of plants'
+                ],
+                organicOptions: [
+                    'Neem oil spray',
+                    'Baking soda solution (1 tbsp baking soda, 1 tsp oil, 1 tsp soap in 1 gallon water)'
+                ]
+            };
+        }
+        
+        // Display diagnosis results
+        function displayDiagnosisResults(diagnosis) {
+            document.getElementById('diseaseName').textContent = diagnosis.disease;
+            document.getElementById('confidence').textContent = `Confidence: ${diagnosis.confidence}`;
+            
+            const treatmentsList = document.getElementById('treatments');
+            treatmentsList.innerHTML = '';
+            diagnosis.treatments.forEach(treatment => {
+                const li = document.createElement('li');
+                li.textContent = treatment;
+                treatmentsList.appendChild(li);
+            });
+            
+            const organicList = document.getElementById('organicSolutions');
+            organicList.innerHTML = '';
+            diagnosis.organicOptions.forEach(option => {
+                const li = document.createElement('li');
+                li.textContent = option;
+                organicList.appendChild(li);
+            });
+            
+            document.getElementById('diagnosisResults').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
